@@ -1,0 +1,81 @@
+
+=== normal ===
+[00 мин] C1 → DSP | REQUEST | O1 → D, 2 кг, срок 20 мин
+[00 мин] DSP → W | CHECK_READY | O1
+[00 мин] W → DSP | READY | O1
+[00 мин] DSP → K1 | ASSIGN | O1, v1, ETA=9
+[00 мин] K1 → DSP | ACCEPT | O1, v1
+[00 мин] K1 → W | PICKUP | O1, v1
+[00 мин] W → DSP | PICKED_UP | K1, v1
+[09 мин] K1: W → H → D (9 мин)
+[09 мин] K1 → DSP | DELIVERED | O1, v1
+[09 мин] DSP → C1 | INFORM | DELIVERED
+Итог: DELIVERED | t=9 мин | сообщений=9 | версия=1 | держатель=C1 | в срок=да
+
+=== fail-before ===
+[00 мин] C1 → DSP | REQUEST | O1 → D, 2 кг, срок 20 мин
+[00 мин] DSP → W | CHECK_READY | O1
+[00 мин] W → DSP | READY | O1
+[00 мин] DSP → K1 | ASSIGN | O1, v1, ETA=9
+[00 мин] K1 → DSP | ACCEPT | O1, v1
+[02 мин] K1 → DSP | FAILURE | O1, v1
+[02 мин] DSP → K2 | ASSIGN | O1, v2, ETA=17
+[02 мин] K2 → DSP | ACCEPT | O1, v2
+[08 мин] K2: B → W (6 мин)
+[08 мин] K2 → W | PICKUP | O1, v2
+[08 мин] W → DSP | PICKED_UP | K2, v2
+[17 мин] K2: W → H → D (9 мин)
+[17 мин] K2 → DSP | DELIVERED | O1, v2
+[17 мин] DSP → C1 | INFORM | DELIVERED
+Итог: DELIVERED | t=17 мин | сообщений=12 | версия=2 | держатель=C1 | в срок=да
+
+=== fail-hub ===
+[00 мин] C1 → DSP | REQUEST | O1 → D, 2 кг, срок 20 мин
+[00 мин] DSP → W | CHECK_READY | O1
+[00 мин] W → DSP | READY | O1
+[00 мин] DSP → K1 | ASSIGN | O1, v1, ETA=9
+[00 мин] K1 → DSP | ACCEPT | O1, v1
+[00 мин] K1 → W | PICKUP | O1, v1
+[00 мин] W → DSP | PICKED_UP | K1, v1
+[04 мин] K1: W → H (4 мин)
+[04 мин] K1 → H | HANDOFF | O1, v1
+[04 мин] H → DSP | AT_HUB | H, v1
+[06 мин] K1 → DSP | FAILURE | O1, v1
+[06 мин] DSP → K2 | ASSIGN | O1, v2, ETA=14
+[06 мин] K2 → DSP | ACCEPT | O1, v2
+[09 мин] K2: B → H (3 мин)
+[09 мин] K2 → H | PICKUP | O1, v2
+[09 мин] H → DSP | PICKED_UP | K2, v2
+[14 мин] K2: H → D (5 мин)
+[14 мин] K2 → DSP | DELIVERED | O1, v2
+[14 мин] DSP → C1 | INFORM | DELIVERED
+Итог: DELIVERED | t=14 мин | сообщений=16 | версия=2 | держатель=C1 | в срок=да
+
+=== lost-contact ===
+[00 мин] C1 → DSP | REQUEST | O1 → D, 2 кг, срок 20 мин
+[00 мин] DSP → W | CHECK_READY | O1
+[00 мин] W → DSP | READY | O1
+[00 мин] DSP → K1 | ASSIGN | O1, v1, ETA=9
+[00 мин] K1 → DSP | ACCEPT | O1, v1
+[00 мин] K1 → W | PICKUP | O1, v1
+[00 мин] W → DSP | PICKED_UP | K1, v1
+[04 мин] K1: W → H (4 мин)
+[06 мин] Истёк тайм-аут ожидания связи с курьером
+[06 мин] DSP → C1 | INFORM | RECOVERY
+Итог: RECOVERY | t=6 мин | сообщений=8 | версия=1 | держатель=K1 | в срок=нет
+
+=== road-closed ===
+[00 мин] C1 → DSP | REQUEST | O1 → D, 2 кг, срок 20 мин
+[00 мин] DSP → W | CHECK_READY | O1
+[00 мин] W → DSP | READY | O1
+[00 мин] DSP → K1 | ASSIGN | O1, v1, ETA=9
+[00 мин] K1 → DSP | ACCEPT | O1, v1
+[00 мин] K1 → W | PICKUP | O1, v1
+[00 мин] W → DSP | PICKED_UP | K1, v1
+[04 мин] K1: W → H (4 мин)
+[04 мин] H → DSP | ROAD_BLOCKED | H–D
+[04 мин] DSP → K1 | MAP_UPDATE | H–D закрыто
+[20 мин] K1: H → W → D (16 мин)
+[20 мин] K1 → DSP | DELIVERED | O1, v1
+[20 мин] DSP → C1 | INFORM | DELIVERED
+Итог: DELIVERED | t=20 мин | сообщений=11 | версия=1 | держатель=C1 | в срок=да
